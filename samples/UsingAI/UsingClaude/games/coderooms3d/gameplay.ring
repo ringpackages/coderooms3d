@@ -192,6 +192,14 @@ func cr_handleInput
         return
     ok
 
+    // ESC → level-select menu
+    if IsKeyPressed(KEY_ESCAPE)
+        menuSelectedLevel = currentRoom
+        gameState = GS_MENU
+        ShowCursor()
+        return
+    ok
+
     // Undo
     if IsKeyPressed(KEY_U) or IsKeyPressed(KEY_BACKSPACE)
         PlaySound(sndUndo)
@@ -503,4 +511,122 @@ func cr_updateCamera
         cam.target.y = 0.8
         cam.target.z = pAnimZ
         cam.fovy = 50
+    ok
+
+// =============================================================
+// Level-Select Menu Input
+// =============================================================
+
+func cr_handleMenuInput
+    prevSel = menuSelectedLevel
+    cols    = 5   // 5 columns × 2 rows = 10 rooms
+
+    if IsKeyPressed(KEY_RIGHT) or IsKeyPressed(KEY_D)
+        if menuSelectedLevel < roomCount
+            menuSelectedLevel += 1
+        ok
+    ok
+    if IsKeyPressed(KEY_LEFT) or IsKeyPressed(KEY_A)
+        if menuSelectedLevel > 1 and menuSelectedLevel != CLOSE_BTN
+            menuSelectedLevel -= 1
+        ok
+    ok
+    if IsKeyPressed(KEY_DOWN) or IsKeyPressed(KEY_S)
+        if menuSelectedLevel <= roomCount - cols
+            menuSelectedLevel += cols
+        but menuSelectedLevel <= roomCount
+            menuSelectedLevel = CLOSE_BTN
+        ok
+    ok
+    if IsKeyPressed(KEY_UP) or IsKeyPressed(KEY_W)
+        if menuSelectedLevel = CLOSE_BTN
+            menuSelectedLevel = roomCount - 1
+        but menuSelectedLevel > cols
+            menuSelectedLevel -= cols
+        ok
+    ok
+
+    if IsKeyPressed(KEY_ENTER) or IsKeyPressed(KEY_SPACE)
+        if menuSelectedLevel = CLOSE_BTN
+            quitGame = true
+            return
+        ok
+        currentRoom = menuSelectedLevel
+        cr_loadRoom(currentRoom)
+        gameState = GS_PLAYING
+        HideCursor()
+        PlaySound(sndMenu)
+        return
+    ok
+
+    if IsKeyPressed(KEY_ESCAPE)
+        quitGame = true
+        return
+    ok
+
+    // Mouse hover & click
+    cr_computeMenuLayout()
+    mx = GetMouseX()
+    my = GetMouseY()
+
+    cardW  = cr_cardW
+    cardH  = cr_cardH
+    gapX   = cr_gapX
+    gapY   = cr_gapY
+    startX = cr_startX
+    startY = cr_startY
+
+    // Detect which item the mouse is over this frame
+    newHover = -1
+    for i = 1 to roomCount
+        row = floor((i - 1) / cols)
+        col = (i - 1) % cols
+        cx  = startX + col * (cardW + gapX)
+        cy  = startY + row * (cardH + gapY)
+        if mx >= cx and mx < cx + cardW and my >= cy and my < cy + cardH
+            newHover = i
+        ok
+    next
+
+    // Close button hover
+    btnW = cr_btnW
+    btnH = cr_btnH
+    btnX = cr_btnX
+    btnY = cr_btnY
+    if mx >= btnX and mx < btnX + btnW and my >= btnY and my < btnY + btnH
+        newHover = CLOSE_BTN
+    ok
+
+    // Track press position and which button was under the cursor at press time
+    if IsMouseButtonPressed(0)
+        menuPressX     = mx
+        menuPressY     = my
+        menuPressHover = newHover
+    ok
+
+    // Sync selection when mouse enters a new item OR moves within the current item
+    mouseMoved = (mx != menuLastMouseX or my != menuLastMouseY)
+    if newHover >= 0 and (newHover != menuLastHover or mouseMoved)
+        menuSelectedLevel = newHover
+    ok
+    menuLastHover  = newHover
+    menuLastMouseX = mx
+    menuLastMouseY = my
+
+    // Click fires only when released over the same button that was pressed
+    if IsMouseButtonReleased(0) and newHover >= 0 and newHover = menuPressHover
+        if menuSelectedLevel = CLOSE_BTN
+            quitGame = true
+            return
+        ok
+        currentRoom = menuSelectedLevel
+        cr_loadRoom(currentRoom)
+        gameState = GS_PLAYING
+        HideCursor()
+        PlaySound(sndMenu)
+        return
+    ok
+
+    if menuSelectedLevel != prevSel
+        PlaySound(sndMenu)
     ok

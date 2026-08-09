@@ -5,11 +5,11 @@ aPackageInfo = [
 	:developer = "",
 	:email = "",
 	:license = "MIT License",
-	:version = "1.0.3",
+	:version = "1.0.4",
 	:ringversion = "1.25",
 	:versions = 	[
 		[
-			:version = "1.0.3",
+			:version = "1.0.4",
 			:branch = "master"
 		]
 	],
@@ -33,6 +33,7 @@ aPackageInfo = [
 		"samples/UsingAI/UsingClaude/games/coderooms3d/README.md",
 		"samples/UsingAI/UsingClaude/games/coderooms3d/rooms.ring",
 		"samples/UsingAI/UsingClaude/games/coderooms3d/sound.ring",
+		"samples/UsingAI/UsingClaude/games/coderooms3d/image/menuback.png",
 		"samples/UsingAI/UsingClaude/games/coderooms3d/sounds/bump.wav",
 		"samples/UsingAI/UsingClaude/games/coderooms3d/sounds/correct.wav",
 		"samples/UsingAI/UsingClaude/games/coderooms3d/sounds/door.wav",

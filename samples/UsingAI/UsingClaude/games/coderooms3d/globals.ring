@@ -24,11 +24,14 @@ T_DOOROPEN  = 7
 T_NEXTROOM  = 8
 
 // Game states
-GS_TITLE    = 0
 GS_PLAYING  = 1
 GS_SOLVED   = 2
 GS_WON      = 3
 GS_TRANS    = 4
+GS_MENU     = 5
+
+// Virtual index for the Close button in the level-select menu
+CLOSE_BTN   = 11
 
 // Camera modes
 CAM_TOP     = 0
@@ -74,7 +77,27 @@ doorOpen    = 0
 cam         = NULL
 camMode     = CAM_FOLLOW
 
-gameState   = GS_TITLE
+gameState   = GS_MENU
+menuSelectedLevel = 1
+menuLastHover     = -1   // tracks last hovered menu item; -1 = none
+menuLastMouseX    = -1   // tracks last mouse X to detect movement
+menuLastMouseY    = -1   // tracks last mouse Y to detect movement
+menuPressX        = -1   // mouse X when left button was first pressed
+menuPressY        = -1   // mouse Y when left button was first pressed
+menuPressHover    = -1   // hovered item index at press time
+quitGame    = false
+
+// Combined welcome + room-select screen layout (computed by
+// cr_computeMenuLayout; shared between cr_drawMenu and cr_handleMenuInput
+// so the drawn geometry and the hit-testing geometry can never drift apart).
+cr_titleSz=0 cr_titleY=0
+cr_subSz=0   cr_subY=0
+cr_ctrlSz=0  cr_ctrlY1=0  cr_ctrlY2=0
+cr_selLblSz=0 cr_selLblY=0
+cr_cardW=0 cr_cardH=0 cr_gapX=0 cr_gapY=0
+cr_roomLblSz=0
+cr_startX=0 cr_startY=0 cr_gridH=0
+cr_btnLblSz=0 cr_btnW=0 cr_btnH=0 cr_btnX=0 cr_btnY=0
 animTime    = 0.0
 solveTimer  = 0.0
 transTimer  = 0.0
@@ -101,7 +124,7 @@ W_STORM   = 4
 W_SNOW    = 5
 W_FOG     = 6
 
-roomWeather = [W_RAIN, W_SNOW, W_STORM, W_CLOUDY, W_FOG, W_CLEAR, W_STORM, W_SNOW, W_RAIN, W_CLEAR]
+roomWeather = [W_RAIN, W_SNOW, W_STORM, W_CLOUDY, W_CLEAR, W_CLEAR, W_STORM, W_SNOW, W_RAIN, W_CLEAR]
 currentWeather = W_CLEAR
 wAnimTime  = 0.0
 wDayTime   = 0.35

@@ -1,5 +1,5 @@
 /*
-**  Code Rooms 3D - Programming Puzzle Game
+**  Prince of Vibe Code (CodeRooms3D) - Programming Puzzle Game
 **  ==========================================
 **  Using Ring Language + RingRayLib
 **
@@ -48,9 +48,10 @@ monIdx = GetCurrentMonitor()
 monW = GetMonitorWidth(monIdx)
 monH = GetMonitorHeight(monIdx)
 
-InitWindow(monW, monH, "Code Rooms 3D")
+InitWindow(monW, monH, "Prince of Vibe Code (CodeRooms3D)")
 SetTargetFPS(60)
-ToggleFullscreen()
+SetExitKey(0)   // disable ESC as quit key; handled manually
+togglefullscreen()
 BeginDrawing()
 ClearBackground(RAYLIBColor(0, 0, 0, 255))
 EndDrawing()
@@ -60,6 +61,9 @@ SCREEN_H = GetScreenHeight()
 
 // Re-init weather positions for actual screen size
 w_initPositions()
+
+// Menu background (must load after window init - OpenGL context required)
+cr_menuBackTex = LoadTexture("image/menuback.png")
 
 // Load Sounds & Music
 cr_loadAudio()
@@ -73,28 +77,22 @@ cr_loadRoom(1)
 // Main Game Loop
 // =============================================================
 
-while not WindowShouldClose()
+while not WindowShouldClose() and not quitGame
 
     dt = GetFrameTime()
     animTime += dt
     UpdateMusicStream(bgMusic)
 
     // --- Input & Update ---
-    if gameState = GS_TITLE
-        gpStart = 0
-        if IsGamepadAvailable(0)
-            // Start button (11) or A/South button (7)
-            if IsGamepadButtonPressed(0, 11) or IsGamepadButtonPressed(0, 7)
-                gpStart = 1
-            ok
-        ok
-        if IsKeyPressed(KEY_ENTER) or IsKeyPressed(KEY_SPACE) or gpStart
-            PlaySound(sndMenu)
-            gameState = GS_PLAYING
-        ok
+    // Snapshot state before any transitions so a state change this frame
+    // does not trigger the NEW state's input handler in the same frame.
+    frameState = gameState
+
+    if frameState = GS_MENU
+        cr_handleMenuInput()
     ok
 
-    if gameState = GS_PLAYING
+    if frameState = GS_PLAYING
         cr_handleInput()
         cr_updateAnimations(dt)
         cr_updateParticles(dt)
@@ -133,6 +131,23 @@ while not WindowShouldClose()
         ok
     ok
 
+    if gameState = GS_WON
+        gpStart = 0
+        if IsGamepadAvailable(0)
+            if IsGamepadButtonPressed(0, 11) or IsGamepadButtonPressed(0, 7)
+                gpStart = 1
+            ok
+        ok
+        if IsKeyPressed(KEY_ENTER) or IsKeyPressed(KEY_SPACE) or gpStart
+            cr_loadRoom(1)
+            gameState = GS_MENU
+            ShowCursor()
+        ok
+        if IsKeyPressed(KEY_ESCAPE)
+            quitGame = true
+        ok
+    ok
+
     if IsKeyPressed(KEY_C)
         camMode = (camMode + 1) % 3
     ok
@@ -149,14 +164,11 @@ while not WindowShouldClose()
     w_drawCelestial()
     w_drawClouds()
 
-    if gameState = GS_TITLE
-        w_drawDrops()
-        w_drawLightning()
-        if currentWeather = W_FOG  w_drawFog()  ok
-        cr_drawTitle()
+    if gameState = GS_MENU
+        cr_drawMenu()
     ok
 
-    if gameState != GS_TITLE
+    if gameState != GS_MENU
 
         BeginMode3D(cam)
             cr_drawFloor()
@@ -216,5 +228,6 @@ end
 // =============================================================
 
 cr_unloadAudio()
+UnloadTexture(cr_menuBackTex)
 
 CloseWindow()

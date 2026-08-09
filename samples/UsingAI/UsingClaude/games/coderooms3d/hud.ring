@@ -177,132 +177,6 @@ func cr_project3Dto2D wx, wy, wz
 // Title Screen
 // =============================================================
 
-func cr_drawTitle
-    // Blue gradient background
-    bands = 20
-    bandH = floor(SCREEN_H / bands) + 1
-    for b = 0 to bands - 1
-        f = b * 1.0 / bands
-        r = floor(10 + f * 15)
-        g = floor(20 + f * 40)
-        bl = floor(80 + f * 100)
-        DrawRectangle(0, b * bandH, SCREEN_W, bandH + 1, RAYLIBColor(r, g, bl, 255))
-    next
-
-    // Animated twinkling stars
-    for tsi = 1 to WS_MAX
-        twinkle = sin(animTime * 2.5 + wsPhase[tsi])
-        bright = floor(wsBright[tsi] * (0.5 + twinkle * 0.5))
-        if bright > 255 bright = 255 ok
-        if bright < 10 loop ok
-        starSz = 2
-        if wsBright[tsi] > 180 starSz = 3 ok
-        if wsBright[tsi] > 230 starSz = 4 ok
-        DrawCircle(wsX[tsi], wsY[tsi], starSz, RAYLIBColor(255, 255, 255, bright))
-        // Bright stars get a cross sparkle
-        if bright > 100
-            spkLen = starSz + floor(bright / 60)
-            DrawLine(wsX[tsi] - spkLen, wsY[tsi], wsX[tsi] + spkLen, wsY[tsi], RAYLIBColor(255, 255, 255, floor(bright * 0.5)))
-            DrawLine(wsX[tsi], wsY[tsi] - spkLen, wsX[tsi], wsY[tsi] + spkLen, RAYLIBColor(255, 255, 255, floor(bright * 0.5)))
-        ok
-        // Glow halo for biggest stars
-        if starSz >= 4
-            DrawCircle(wsX[tsi], wsY[tsi], starSz + 4, RAYLIBColor(200, 220, 255, floor(bright * 0.15)))
-        ok
-    next
-
-    // Title - sine wave animated per character (centered)
-    t1 = "CODE ROOMS 3D"
-    titleSz = 120
-    t1Len = len(t1)
-    // Measure total width accounting for per-character rendering
-    totalW = 0
-    for ci = 1 to t1Len
-        totalW += MeasureText(substr(t1, ci, 1), titleSz)
-    next
-    charX = (SCREEN_W - totalW) / 2
-    titleY = floor(SCREEN_H * 0.04)
-    for ci = 1 to t1Len
-        ch = substr(t1, ci, 1)
-        chW = MeasureText(ch, titleSz)
-        waveY = floor(sin(animTime * 3 + ci * 0.5) * 20)
-        // Glow
-        DrawText(ch, charX + 3, titleY + 3 + waveY, titleSz, RAYLIBColor(255, 220, 60, 80))
-        // Letter with color shift
-        hue = floor((animTime * 40 + ci * 20) % 60)
-        DrawText(ch, charX, titleY + waveY, titleSz, RAYLIBColor(255, 235 + hue/3, 200 + hue, 255))
-        charX += chW
-    next
-
-    // Calculate vertical centering zone
-    // Title bottom edge
-    titleBottom = titleY + titleSz + 25
-    // Start prompt top edge
-    promptY = SCREEN_H - 140
-    // Content: subtitle(52) + gap(20) + 11 lines * 40 = ~512
-    subSz = 52
-    bodySz = 30
-    lineH = 40
-    contentH = subSz + 20 + 13 * lineH
-    // Center content in the gap
-    midZone = titleBottom + (promptY - titleBottom - contentH) / 2
-
-    // Subtitle - yellow
-    t2 = "Programming Puzzle Game"
-    t2w = MeasureText(t2, subSz)
-    DrawText(t2, (SCREEN_W - t2w) / 2, midZone, subSz, RAYLIBColor(255, 220, 60, 255))
-
-    // Description
-    lines = [
-        "You are trapped in a world of rooms!",
-        "Each room has a programming puzzle to solve.",
-        "",
-        "Push the code blocks onto the assembly line",
-        "in the correct order to form a valid program.",
-        "When the code is correct, the door opens!",
-        "",
-        "Controls:",
-        "Arrow Keys / WASD - Move & Push Blocks",
-        "U - Undo Last Move    R - Restart Room",
-        "N / Page Down - Next Level",
-        "P / Page Up - Previous Level",
-        "C - Cycle Camera View"
-    ]
-
-    cy = midZone + subSz + 20
-    linesLen = len(lines)
-    for i = 1 to linesLen
-        if i = 8
-            // "Controls:" in yellow
-            col = RAYLIBColor(255, 220, 60, 240)
-        but i >= 9
-            // Control keys in silver
-            col = RAYLIBColor(200, 205, 215, 230)
-        but i <= 2
-            // Story text in white
-            col = RAYLIBColor(240, 245, 255, 240)
-        else
-            // Other text in silver
-            col = RAYLIBColor(190, 195, 210, 220)
-        ok
-        lw = MeasureText(lines[i], bodySz)
-        DrawText(lines[i], (SCREEN_W - lw) / 2, cy + (i - 1) * lineH, bodySz, col)
-    next
-
-    // Blinking start prompt - white
-    if floor(animTime * 2) % 2 = 0
-        st = "Press ENTER or SPACE to Start"
-        startSz = 48
-        stw = MeasureText(st, startSz)
-        DrawText(st, (SCREEN_W - stw) / 2, promptY, startSz, RAYLIBColor(255, 255, 255, 255))
-    ok
-
-    // Credit - silver
-    cr2 = "Developed using Ring Language + RingRayLib"
-    credSz = 24
-    crw = MeasureText(cr2, credSz)
-    DrawText(cr2, (SCREEN_W - crw) / 2, SCREEN_H - 55, credSz, RAYLIBColor(170, 175, 190, 200))
-
 // =============================================================
 // Solved Overlay
 // =============================================================
@@ -347,8 +221,163 @@ func cr_drawWinScreen
     DrawText(t4, (SCREEN_W - t4w) / 2, SCREEN_H / 2 + 70, 20,
              RAYLIBColor(255, 220, 80, 220))
 
-    cr2 = "Developed using Ring Language + RingRayLib"
-    crw = MeasureText(cr2, 14)
-    DrawText(cr2, (SCREEN_W - crw) / 2, SCREEN_H - 40, 14,
-             RAYLIBColor(100, 100, 120, 180))
+    t5 = "Press ENTER to play again  |  ESC to exit"
+    t5w = MeasureText(t5, 20)
+    pulse = floor(180 + 75 * sin(animTime * 3.0))
+    if pulse > 255 pulse = 255 ok
+    DrawText(t5, (SCREEN_W - t5w) / 2, SCREEN_H / 2 + 130, 20,
+             RAYLIBColor(160, 220, 255, pulse))
+
+// =============================================================
+// Combined Welcome + Room-Select Screen
+// =============================================================
+
+# Decorative gradient border frame around the welcome screen, in the style of
+# povc.ring's notification borders (drawFancyBorder) but drawn with plain
+# raylib primitives instead of the border PNG.
+func drawScreenBorder gradCol1, gradCol2, outerCol, innerCol
+    inset = 14   thick = 5
+    DrawRectangleGradientH(inset, inset, SCREEN_W-inset*2, thick, gradCol1, gradCol2)
+    DrawRectangleGradientH(inset, SCREEN_H-inset-thick, SCREEN_W-inset*2, thick, gradCol2, gradCol1)
+    DrawRectangleGradientV(inset, inset, thick, SCREEN_H-inset*2, gradCol1, gradCol2)
+    DrawRectangleGradientV(SCREEN_W-inset-thick, inset, thick, SCREEN_H-inset*2, gradCol1, gradCol2)
+    DrawRectangleLines(inset-3, inset-3, SCREEN_W-(inset-3)*2, SCREEN_H-(inset-3)*2, outerCol)
+    DrawRectangleLines(inset+thick+4, inset+thick+4, SCREEN_W-(inset+thick+4)*2, SCREEN_H-(inset+thick+4)*2, innerCol)
+
+# Shared layout math for the combined welcome/room-select screen, used by
+# both cr_drawMenu (drawing) and cr_handleMenuInput (mouse hit-testing) so
+# they can never drift apart. Fonts scale with the monitor's actual
+# resolution (baseline = 700px tall), and the whole block -- title, subtitle,
+# guidelines, room grid, close button -- is vertically centered based on its
+# real computed content height.
+func cr_computeMenuLayout
+    mY = SCREEN_H / 700.0
+
+    cr_titleSz = max(40, floor(100*mY))
+    cr_subSz   = max(18, floor(36*mY))
+    cr_ctrlSz  = max(12, floor(20*mY))
+    cr_selLblSz= max(15, floor(28*mY))
+
+    cr_roomLblSz = max(18, floor(28*mY))
+    cr_btnLblSz = max(15, floor(22*mY))
+    cr_btnW = max(floor(100*mY), MeasureText("CLOSE GAME", cr_btnLblSz) + 30)
+    cr_btnH = floor(50*mY)
+
+    cr_cardW = max(floor(90*mY), MeasureText("10", cr_roomLblSz) + 30)
+    cr_cardH = cr_btnH        // same height as the Close button
+    cr_gapX  = floor(20*mY)
+    cr_gapY  = floor(18*mY)
+
+    gap1 = floor(14*mY)   // title -> subtitle
+    gap2 = floor(16*mY)   // subtitle -> controls
+    ctrlPitch = floor(26*mY)
+    gap3 = floor(20*mY)   // controls -> "SELECT ROOM" label
+    gap4 = floor(12*mY)   // label -> grid
+    gap5 = floor(16*mY)   // grid -> close button
+
+    titleBlockH = cr_titleSz + floor(14*mY)
+    subBlockH   = cr_subSz
+    ctrlBlockH  = ctrlPitch + cr_ctrlSz   // 2 lines
+    selLblBlockH = cr_selLblSz
+    cr_gridH = 2 * cr_cardH + cr_gapY
+    btnBlockH = cr_btnH
+
+    contentH = titleBlockH+gap1+subBlockH+gap2+ctrlBlockH+gap3+selLblBlockH+gap4+cr_gridH+gap5+btnBlockH
+
+    topY = floor((SCREEN_H - contentH) / 2)
+    if topY < floor(14*mY)  topY = floor(14*mY)  ok
+
+    cr_titleY   = topY
+    cr_subY     = cr_titleY + titleBlockH + gap1
+    cr_ctrlY1   = cr_subY + subBlockH + gap2
+    cr_ctrlY2   = cr_ctrlY1 + ctrlPitch
+    cr_selLblY  = cr_ctrlY1 + ctrlBlockH + gap3
+    cr_startY   = cr_selLblY + selLblBlockH + gap4
+    cr_btnY     = cr_startY + cr_gridH + gap5
+
+    totalGridW = 5 * cr_cardW + 4 * cr_gapX
+    cr_startX = floor((SCREEN_W - totalGridW) / 2)
+    cr_btnX   = floor((SCREEN_W - cr_btnW) / 2)
+
+func cr_drawMenu
+    cr_computeMenuLayout()
+
+    // Menu background image
+    DrawTexturePro(cr_menuBackTex,
+        Rectangle(0.0, 0.0, cr_menuBackTex.width*1.0, cr_menuBackTex.height*1.0),
+        Rectangle(0.0, 0.0, SCREEN_W*1.0, SCREEN_H*1.0),
+        Vector2(0.0, 0.0), 0.0, WHITE)
+
+    // Title (with a gentle wobble/bounce, drop-shadow copy underneath)
+    wob = floor(sin(animTime * 2.0) * 8)
+    t1 = "Code Rooms 3D"
+    t1w = MeasureText(t1, cr_titleSz)
+    DrawText(t1, floor((SCREEN_W - t1w)/2) + 3, cr_titleY + 3 + wob, cr_titleSz, RAYLIBColor(0, 20, 10, 200))
+    DrawText(t1, floor((SCREEN_W - t1w)/2), cr_titleY + wob, cr_titleSz, WHITE)
+
+    // Subtitle
+    sub = "Programming Puzzle Game"
+    DrawText(sub, floor((SCREEN_W - MeasureText(sub, cr_subSz)) / 2), cr_subY,
+             cr_subSz, RAYLIBColor(180, 220, 180, 200))
+
+    ctrl1 = "Push code blocks onto the assembly line to solve each room!"
+    DrawText(ctrl1, floor((SCREEN_W - MeasureText(ctrl1, cr_ctrlSz)) / 2), cr_ctrlY1,
+             cr_ctrlSz, RAYLIBColor(180, 220, 180, 200))
+
+    ctrl2 = "Arrows/WASD: Move & Push  |  U: Undo  |  R: Restart  |  C: Camera"
+    DrawText(ctrl2, floor((SCREEN_W - MeasureText(ctrl2, cr_ctrlSz)) / 2), cr_ctrlY2,
+             cr_ctrlSz, RAYLIBColor(180, 220, 180, 200))
+
+    selLabel = "SELECT ROOM"
+    DrawText(selLabel, floor((SCREEN_W - MeasureText(selLabel, cr_selLblSz)) / 2),
+             cr_selLblY, cr_selLblSz, RAYLIBColor(180, 220, 180, 200))
+
+    cols = 5
+    cardW = cr_cardW  cardH = cr_cardH
+    gapX  = cr_gapX   gapY  = cr_gapY
+    startX = cr_startX  startY = cr_startY
+
+    for i = 1 to roomCount
+        row = floor((i - 1) / cols)
+        col = (i - 1) % cols
+        cx  = startX + col * (cardW + gapX)
+        cy  = startY + row * (cardH + gapY)
+
+        isActive   = (i = menuSelectedLevel)
+
+        if isActive
+            DrawRectangleGradientV(cx, cy, cardW, cardH, RAYLIBColor(210, 235, 248, 255), RAYLIBColor(140, 190, 218, 255))
+            DrawRectangleLines(cx, cy, cardW, cardH, RAYLIBColor(0, 0, 80, 255))
+            cardTextCol = RAYLIBColor(0, 0, 80, 255)
+        else
+            DrawRectangleGradientV(cx, cy, cardW, cardH, RAYLIBColor(25, 35, 45, 255), RAYLIBColor(12, 18, 25, 255))
+            DrawRectangleLines(cx, cy, cardW, cardH, RAYLIBColor(173, 216, 230, 255))
+            cardTextCol = RAYLIBColor(173, 216, 230, 255)
+        ok
+
+        // Room number
+        roomStr = string(i)
+        rW      = MeasureText(roomStr, cr_roomLblSz)
+        DrawText(roomStr, cx + floor((cardW - rW) / 2), cy + floor((cardH - cr_roomLblSz) / 2), cr_roomLblSz, cardTextCol)
+    next
+
+    // Close button
+    btnW = cr_btnW  btnH = cr_btnH
+    btnX = cr_btnX  btnY = cr_btnY
+
+    btnActive = (menuSelectedLevel = CLOSE_BTN)
+    if btnActive
+        DrawRectangleGradientV(btnX, btnY, btnW, btnH, RAYLIBColor(210, 235, 248, 255), RAYLIBColor(140, 190, 218, 255))
+        DrawRectangleLines(btnX, btnY, btnW, btnH, RAYLIBColor(0, 0, 80, 255))
+        btnTextCol = RAYLIBColor(0, 0, 80, 255)
+    else
+        DrawRectangleGradientV(btnX, btnY, btnW, btnH, RAYLIBColor(25, 35, 45, 255), RAYLIBColor(12, 18, 25, 255))
+        DrawRectangleLines(btnX, btnY, btnW, btnH, RAYLIBColor(173, 216, 230, 255))
+        btnTextCol = RAYLIBColor(173, 216, 230, 255)
+    ok
+    closeStr = "CLOSE GAME"
+    DrawText(closeStr, btnX + floor((btnW - MeasureText(closeStr, cr_btnLblSz)) / 2),
+             btnY + floor((btnH - cr_btnLblSz) / 2), cr_btnLblSz, btnTextCol)
+
+    drawScreenBorder(RAYLIBColor(8,60,30,235), RAYLIBColor(3,25,12,235), RAYLIBColor(173,216,230,255), RAYLIBColor(173,216,230,70))
 
